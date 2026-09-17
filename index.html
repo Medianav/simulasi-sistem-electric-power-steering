@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>Sistem Electric Power Steering</title><meta name="title" content="Sistem Electric Power Steering"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="./style.css"><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
+  "imports": {}
+}</script></head><body>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Interaktif EPS - 3D POV Belakang</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #0b0b10;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-area {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #00d2ff;
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+        }
+        p.subtitle {
+            color: #aaa;
+            margin: 4px 0 0 0;
+            font-size: 12px;
+        }
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            gap: 14px;
+            width: 100%;
+            align-items: flex-start;
+        }
+        .canvas-container {
+            flex: 1 1 70%;
+            background: #14141c;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            position: relative;
+            min-width: 0;
+            width: 100%;
+            aspect-ratio: 16 / 9.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            background: #050508;
+            border-radius: 6px;
+            border: 1.5px solid #2a2a38;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .canvas-hint {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            background: rgba(0, 210, 255, 0.15);
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .sidebar {
+            flex: 0 0 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 320px;
+        }
+        .card {
+            background: #181822;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+        }
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #00d2ff;
+            font-size: 13px;
+            border-bottom: 1px solid #333345;
+            padding-bottom: 5px;
+        }
+        .control-group { margin-bottom: 8px; }
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+        .val { color: #00d2ff; }
+        input[type=range] {
+            width: 100%;
+            accent-color: #00d2ff;
+            cursor: pointer;
+            height: 5px;
+        }
+        input[type=range]:disabled {
+            accent-color: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .switch-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #101017;
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin-bottom: 6px;
+        }
+        .switch-label { font-size: 11px; font-weight: bold; }
+        .btn-group-dual { display: flex; gap: 4px; }
+        .toggle-btn {
+            padding: 5px 12px;
+            font-weight: bold;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-dual { background: #2a2a38; color: #888; }
+        .btn-dual-start.active { background: #28a745; color: white; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
+        .btn-dual-off.active { background: #dc3545; color: white; box-shadow: 0 0 8px rgba(220, 53, 69, 0.5); }
+        .btn-off { background: #dc3545; color: white; }
+        .btn-on { background: #28a745; color: white; }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            height: 20px;
+            margin-bottom: 4px;
+        }
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: bold; }
+        .badge-active { background: #28a745; color: white; }
+        .badge-fail { background: #dc3545; color: white; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-card {
+            background: #1c1c28;
+            border: 2px solid #00d2ff;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 480px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(0,210,255,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333345;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+        .modal-title { color: #00d2ff; font-size: 16px; font-weight: bold; margin: 0; }
+        .close-btn { background: transparent; border: none; color: #aaa; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
+        .modal-body p { font-size: 12px; line-height: 1.5; color: #ddd; margin: 6px 0; }
+        .modal-body strong { color: #00d2ff; }
+
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .sidebar { width: 100%; flex: none; }
+        }
+    </style>
+
+
+
+    <div class="wrapper">
+        <div class="header-area">
+            <h1>Sistem Electric Power Steering (EPS)</h1>
+            <p class="subtitle">Mapel B5 X Otomotif SMKS Teknologi Madania Salunarani</p>
+        </div>
+
+        <div class="main-layout">
+            <div class="canvas-container" id="canvasContainer">
+                <div class="canvas-hint">💡 Klik Komponen untuk Detail | Putar Setir (Drag Mouse)</div>
+                <canvas id="epsCanvas" width="1050" height="650"></canvas>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <h3>Kelistrikan &amp; Kontrol Mekanis</h3>
+                    <div class="switch-group">
+                        <span class="switch-label">Kunci Kontak (Ignition Switch):</span>
+                        <div class="btn-group-dual">
+                            <button id="ignStartBtn" class="toggle-btn btn-dual btn-dual-start" onclick="setIgnition(true)">START</button>
+                            <button id="ignOffBtn" class="toggle-btn btn-dual btn-dual-off active" onclick="setIgnition(false)">OFF</button>
+                        </div>
+                    </div>
+                    <div class="switch-group">
+                        <span class="switch-label">Rem Tangan (Handbrake):</span>
+                        <button id="brakeBtn" class="toggle-btn btn-off" onclick="toggleHandbrake()">TARIK (ON)</button>
+                    </div>
+                    <div class="switch-group">
+                        <span class="switch-label">Sekring Utama (EPS Fuse 40A):</span>
+                        <button id="fuseBtn" class="toggle-btn btn-on" onclick="toggleFuse()">NORMAL</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Parameter Laju Kendaraan</h3>
+                    <div class="control-group">
+                        <label>Kecepatan Kendaraan (VSS): <span id="vssVal" class="val">0 km/h (Mati)</span></label>
+                        <input type="range" id="vssInput" min="0" max="140" step="5" value="0" disabled="">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Monitor Kontrol EPS ECU</h3>
+                    <div class="data-row">
+                        <span>Tegangan Utama Sistem:</span>
+                        <strong id="sysVoltage" style="color: #ff3333;">0.0 V</strong>
+                    </div>
+                    <div class="data-row">
+                        <span>Status Laju Mobil:</span>
+                        <strong id="driveStatus" style="color: #ff3333;">MESIN MATI</strong>
+                    </div>
+                    <div class="data-row">
+                        <span>Sudut Kemudi (SAS):</span>
+                        <strong id="angleVal" style="color: #00d2ff;">0.0° (Lurus)</strong>
+                    </div>
+                    <div class="data-row">
+                        <span>Sinyal Torque Sensor:</span>
+                        <strong id="torqueVal" style="color: #00e5ff;">0.0 Nm</strong>
+                    </div>
+                    <div class="data-row">
+                        <span>Arus Motor Assist (PWM Duty):</span>
+                        <strong id="pwmVal" style="color: #ffcc00;">0%</strong>
+                    </div>
+                    <div class="data-row">
+                        <span>Beban Kemudi (Steering Effort):</span>
+                        <strong id="effortVal">NETRAL</strong>
+                    </div>
+                    <div class="data-row" style="margin-top: 4px;">
+                        <span>Lampu Warning EPS:</span>
+                        <span id="epsBadge" class="badge badge-fail">OFF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETAIL POPUP -->
+    <div id="detailModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="modal-title">Nama Komponen</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Kategori:</strong> <span id="modalCategory">-</span></p>
+                <p><strong>Fungsi Utama:</strong> <span id="modalFunction">-</span></p>
+                <p><strong>Cara Kerja:</strong> <span id="modalWorking">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('epsCanvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (typeof r === 'number') r = {tl: r, tr: r, br: r, bl: r};
+                this.beginPath();
+                this.moveTo(x + r.tl, y);
+                this.lineTo(x + w - r.tr, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+                this.lineTo(x + w, y + h - r.br);
+                this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+                this.lineTo(x + r.bl, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+                this.lineTo(x, y + r.tl);
+                this.quadraticCurveTo(x, y, x + r.tl, y);
+                this.closePath();
+                return this;
+            };
+        }
+
+        let isIgnitionOn = false;
+        let isHandbrakeOn = true;
+        let isFuseOk = true;
+
+        let currentSpeed = 0;
+
+        const MAX_STEER_ANGLE = 450; 
+        let steeringAngle = 0;       
+        let isDraggingWheel = false;
+        let hasDraggedFar = false;
+        let dragStartPos = { x: 0, y: 0 };
+        let lastDragMouseAngle = 0;
+
+        let wheelRotationAngle = 0;
+        let roadDashOffset = 0;
+        let dashWireOffset = 0;
+
+        const centerWheelPos = { x: 525, y: 520, radius: 110 };
+
+        const componentsDB = [
+            { id: "battery", title: "Aki / Baterai (12V Main Battery)", cat: "Sistem Kelistrikan Utama", func: "Penyedia sumber tegangan utama DC 12 Volt untuk sirkuit EPS.", work: "Menyuplai tegangan positif (+12V) murni melalui sekring daya tinggi EPS dan sakelar kunci kontak menuju EPS ECU.", bounds: {x: 880, y: 320, w: 75, h: 55} },
+            { id: "sas", title: "Steering Angle Sensor (SAS)", cat: "Input Sensor Utama", func: "Mendeteksi sudut rotasi dan arah putaran setir.", work: "Sensor membaca derajat putaran poros kemudi lalu mengirimkan sinyal data MASUK KE EPS ECU.", bounds: {x: 470, y: 440, w: 110, h: 25} },
+            { id: "torquesensor", title: "Torque Sensor (Sensor Torsi)", cat: "Input Sensor Utama", func: "Mendeteksi gaya puntiran tangan pengemudi pada poros kemudi.", work: "Merubah gaya puntir mekanis menjadi sinyal tegangan analog yang dikirim MASUK KE EPS ECU.", bounds: {x: 505, y: 355, w: 40, h: 35} },
+            { id: "vss", title: "Vehicle Speed Sensor (VSS)", cat: "Input Sensor Laju", func: "Mendeteksi kecepatan rotasi roda / laju kecepatan kendaraan.", work: "Mengirimkan pulsa frekuensi sinyal MASUK KE EPS ECU untuk kalkulasi Speed-Sensitive Assist.", bounds: {x: 820, y: 160, w: 50, h: 30} },
+            { id: "epsecu", title: "EPS ECU (Electronic Control Unit)", cat: "Unit Otak Kontrol Pusat", func: "Mengkalkulasi tingkat bantuan assist dan mengendalikan output ke motor assist.", work: "Menerima input dari Torque Sensor, SAS, dan VSS. Mengolah algoritma untuk MENGELUARKAN daya PWM ke Motor Assist.", bounds: {x: 650, y: 315, w: 110, h: 90} },
+            { id: "motorassist", title: "Electric Motor Assist (EPS Motor)", cat: "Aktuator Utama Output ECU", func: "Aktuator elektrik yang memberikan bantuan daya putar kemudi.", work: "Menerima pasokan sinyal daya PWM berarus tinggi DARI EPS ECU untuk memutar reduction gear.", bounds: {x: 390, y: 315, w: 75, h: 65} },
+            { id: "steeringwheel", title: "Roda Kemudi POV (Steering Wheel)", cat: "Mekanisme Kemudi Kabin", func: "Menerima input gaya putar langsung dari pengemudi.", work: "Menyalurkan putaran setir hingga mentok 2,5 kali rotasi (-450° sampai +450°) menuju SAS, Torque Sensor, dan steering rack.", bounds: {x: 415, y: 410, w: 220, h: 220} },
+            { id: "rackpinion", title: "Steering Rack & Pinion Housing", cat: "Mekanisme Kemudi", func: "Mengubah gerakan rotasi setir menjadi gerakan lurus horizontal ke roda depan.", work: "Pinion gear bersama assist motor mendorong batang inner rack ke kiri/kanan sampai menyentuh batas mekanis stopper.", bounds: {x: 220, y: 265, w: 610, h: 30} },
+            { id: "leftwheel", title: "Ban & Roda Kiri (3D POV Belakang)", cat: "Aktuator Roda Utama", func: "Roda depan kiri dalam tampilan perspektif 3D dari belakang.", work: "Memiliki yaw offset belok serta rotasi velg & alur kembangan ban 3D saat mobil meluncur.", bounds: {x: 180, y: 140, w: 100, h: 170} },
+            { id: "rightwheel", title: "Ban & Roda Kanan (3D POV Belakang)", cat: "Aktuator Roda Utama", func: "Roda depan kanan dalam tampilan perspektif 3D dari belakang.", work: "Memiliki yaw offset belok serta rotasi velg & alur kembangan ban 3D saat mobil meluncur.", bounds: {x: 770, y: 140, w: 100, h: 170} }
+        ];
+
+        function setIgnition(status) {
+            isIgnitionOn = status;
+            const startBtn = document.getElementById('ignStartBtn');
+            const offBtn = document.getElementById('ignOffBtn');
+            const vssInput = document.getElementById('vssInput');
+
+            if (isIgnitionOn) {
+                startBtn.classList.add('active');
+                offBtn.classList.remove('active');
+                vssInput.disabled = false;
+            } else {
+                offBtn.classList.add('active');
+                startBtn.classList.remove('active');
+                vssInput.disabled = true;
+                vssInput.value = 0;
+            }
+        }
+
+        function toggleHandbrake() {
+            isHandbrakeOn = !isHandbrakeOn;
+            const btn = document.getElementById('brakeBtn');
+            btn.innerText = isHandbrakeOn ? 'TARIK (ON)' : 'LEPAS (OFF)';
+            btn.className = `toggle-btn ${isHandbrakeOn ? 'btn-off' : 'btn-on'}`;
+        }
+
+        function toggleFuse() {
+            isFuseOk = !isFuseOk;
+            const btn = document.getElementById('fuseBtn');
+            btn.innerText = isFuseOk ? 'NORMAL' : 'PUTUS';
+            btn.className = `toggle-btn ${isFuseOk ? 'btn-on' : 'btn-off'}`;
+        }
+
+        function getCanvasMousePos(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = 1050 / rect.width;
+            const scaleY = 650 / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function getAngleFromMouse(clientX, clientY) {
+            const pos = getCanvasMousePos(clientX, clientY);
+            const dx = pos.x - centerWheelPos.x;
+            const dy = pos.y - centerWheelPos.y;
+            return Math.atan2(dy, dx) * (180 / Math.PI);
+        }
+
+        function startDrag(e, clientX, clientY) {
+            const pos = getCanvasMousePos(clientX, clientY);
+            dragStartPos = { x: clientX, y: clientY };
+            hasDraggedFar = false;
+
+            const dist = Math.hypot(pos.x - centerWheelPos.x, pos.y - centerWheelPos.y);
+            if (dist <= centerWheelPos.radius + 25) {
+                isDraggingWheel = true;
+                lastDragMouseAngle = getAngleFromMouse(clientX, clientY);
+                return true;
+            }
+            return false;
+        }
+
+        function updateDrag(e, clientX, clientY) {
+            if (!isDraggingWheel) return;
+            
+            if (Math.hypot(clientX - dragStartPos.x, clientY - dragStartPos.y) > 5) {
+                hasDraggedFar = true;
+            }
+            
+            const currentMouseAngle = getAngleFromMouse(clientX, clientY);
+            let delta = currentMouseAngle - lastDragMouseAngle;
+
+            if (delta > 180) delta -= 360;
+            if (delta < -180) delta += 360;
+
+            let nextAngle = steeringAngle + delta;
+
+            if (nextAngle > MAX_STEER_ANGLE) {
+                steeringAngle = MAX_STEER_ANGLE;
+            } else if (nextAngle < -MAX_STEER_ANGLE) {
+                steeringAngle = -MAX_STEER_ANGLE;
+            } else {
+                steeringAngle = nextAngle;
+            }
+
+            lastDragMouseAngle = currentMouseAngle;
+        }
+
+        canvas.addEventListener('click', function(e) {
+            if (hasDraggedFar) return;
+
+            const pos = getCanvasMousePos(e.clientX, e.clientY);
+
+            for (let comp of componentsDB) {
+                const b = comp.bounds;
+                if (pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h) {
+                    showModal(comp);
+                    return;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousedown', (e) => startDrag(e, e.clientX, e.clientY));
+        window.addEventListener('mousemove', (e) => updateDrag(e, e.clientX, e.clientY));
+        window.addEventListener('mouseup', () => { isDraggingWheel = false; });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                startDrag(e, e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDraggingWheel) {
+                updateDrag(e, e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => { isDraggingWheel = false; });
+
+        function processLogic() {
+            const targetVss = parseInt(document.getElementById('vssInput').value);
+
+            if (isIgnitionOn) {
+                if (isHandbrakeOn) {
+                    currentSpeed = Math.max(0, currentSpeed - 1.5);
+                } else {
+                    if (currentSpeed < targetVss) {
+                        currentSpeed = Math.min(targetVss, currentSpeed + 1.0);
+                    } else if (currentSpeed > targetVss) {
+                        currentSpeed = Math.max(targetVss, currentSpeed - 1.0);
+                    }
+                }
+            } else {
+                if (isHandbrakeOn) {
+                    currentSpeed = Math.max(0, currentSpeed - 1.2);
+                } else {
+                    currentSpeed = Math.max(0, currentSpeed - 0.25);
+                }
+            }
+
+            const effectiveVss = Math.round(currentSpeed);
+
+            const driveStatusEl = document.getElementById('driveStatus');
+            if (!isIgnitionOn && effectiveVss === 0) {
+                driveStatusEl.innerText = "MESIN MATI";
+                driveStatusEl.style.color = "#ff3333";
+            } else if (isHandbrakeOn && effectiveVss === 0) {
+                driveStatusEl.innerText = "TERKUNCI (REM TANGAN)";
+                driveStatusEl.style.color = "#ffc107";
+            } else if (effectiveVss > 0) {
+                driveStatusEl.innerText = `${isIgnitionOn ? 'BERJALAN' : 'MELUNCUR (INERSIA)'} (${effectiveVss} km/h)`;
+                driveStatusEl.style.color = isIgnitionOn ? "#00ff66" : "#ffcc00";
+            } else {
+                driveStatusEl.innerText = "BERHENTI (IDLE)";
+                driveStatusEl.style.color = "#ffffff";
+            }
+
+            document.getElementById('vssVal').innerText = isIgnitionOn 
+                ? `${effectiveVss} km/h ${isHandbrakeOn && targetVss > 0 ? '(Mengerem)' : ''}` 
+                : `${effectiveVss} km/h (Mati)`;
+
+            if (!isDraggingWheel && Math.abs(steeringAngle) > 0.1) {
+                const returnSpeed = 2.5 + (effectiveVss / 140) * 5.0;
+                if (steeringAngle > 0) {
+                    steeringAngle = Math.max(0, steeringAngle - returnSpeed);
+                } else {
+                    steeringAngle = Math.min(0, steeringAngle + returnSpeed);
+                }
+            } else if (Math.abs(steeringAngle) <= 0.1) {
+                steeringAngle = 0;
+            }
+
+            document.getElementById('angleVal').innerText = `${steeringAngle.toFixed(1)}° (${steeringAngle === 0 ? 'Lurus' : (steeringAngle < 0 ? 'Kiri' : 'Kanan')})`;
+            
+            const powered = isIgnitionOn && isFuseOk;
+            document.getElementById('sysVoltage').innerText = powered ? "12.6 V" : (isIgnitionOn && !isFuseOk ? "12.6V (Fuse Putus)" : "0.0 V");
+
+            const badge = document.getElementById('epsBadge');
+            if(!isIgnitionOn) {
+                badge.innerText = "OFF"; badge.className = "badge";
+            } else if(!isFuseOk) {
+                badge.innerText = "WARNING (FAILSAFE)"; badge.className = "badge badge-fail";
+            } else {
+                badge.innerText = "NORMAL"; badge.className = "badge badge-active";
+            }
+
+            if (!powered) {
+                document.getElementById('torqueVal').innerText = "0.0 Nm";
+                document.getElementById('pwmVal').innerText = "0%";
+                document.getElementById('effortVal').innerText = "BERAT (MANUAL)";
+                document.getElementById('effortVal').style.color = "#ff3333";
+                return { powered: false, vss: effectiveVss, torque: 0, pwm: 0 };
+            }
+
+            const absAngle = Math.abs(steeringAngle);
+            const torque = (absAngle / MAX_STEER_ANGLE) * 8.5;
+
+            let assistFactor = 1.0;
+            if (effectiveVss > 15) {
+                assistFactor = Math.max(0.2, 1.0 - ((effectiveVss - 15) / 125) * 0.75);
+            }
+
+            const pwm = Math.min(100, Math.round((absAngle / MAX_STEER_ANGLE) * 100 * assistFactor));
+
+            document.getElementById('torqueVal').innerText = `${torque.toFixed(1)} Nm`;
+            document.getElementById('pwmVal').innerText = `${pwm}%`;
+
+            const effortText = document.getElementById('effortVal');
+            if (pwm > 60) {
+                effortText.innerText = "SANGAT RINGAN (PARKIR)"; effortText.style.color = "#00ff66";
+            } else if (pwm > 20) {
+                effortText.innerText = "SEDANG / STABIL"; effortText.style.color = "#00d2ff";
+            } else if (steeringAngle === 0) {
+                effortText.innerText = "NETRAL (STABIL)"; effortText.style.color = "#ffffff";
+            } else {
+                effortText.innerText = "MANTAP (SPEED HIGH)"; effortText.style.color = "#ffcc00";
+            }
+
+            return { powered: true, vss: effectiveVss, torque, pwm };
+        }
+
+        function drawWire(path, color = '#ff3333', isAnimated = false, width = 2.5) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            if (isAnimated) {
+                ctx.setLineDash([6, 4]);
+                ctx.lineDashOffset = -dashWireOffset;
+            } else {
+                ctx.setLineDash([]);
+            }
+            ctx.beginPath();
+            ctx.moveTo(path[0][0], path[0][1]);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i][0], path[i][1]);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawBattery(x, y) {
+            ctx.fillStyle = '#1e1e1e'; ctx.beginPath(); ctx.roundRect(x, y, 75, 55, 5); ctx.fill();
+            ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#e74c3c'; ctx.fillRect(x + 10, y - 7, 14, 7);
+            ctx.fillStyle = '#7f8c8d'; ctx.fillRect(x + 50, y - 7, 14, 7);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.fillText("AKI 12V", x + 18, y + 32);
+        }
+
+        function drawVSS(x, y) {
+            ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.roundRect(x, y, 50, 30, 4); ctx.fill();
+            ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 8px sans-serif'; ctx.fillText("VSS", x + 15, y + 18);
+        }
+
+        // FUNGSI RENDER BAN / RODA 3D DARI POV BELAKANG
+        function draw3DRearWheel(centerX, centerY, isLeftWheel, steerAngleDeg, speedVss) {
+            ctx.save();
+            ctx.translate(centerX, centerY);
+
+            // Perhitungan kemiringan/sudut yaw belok
+            const steerNorm = (steerAngleDeg / MAX_STEER_ANGLE);
+            const yawRad = steerNorm * (Math.PI / 7.0); 
+
+            ctx.rotate(yawRad);
+
+            const tireWidth = 54;
+            const tireHeight = 150;
+            const perspectiveDepth = 22 * Math.sin(yawRad);
+
+            // 1. Shading Bayangan 3D Roda
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath();
+            ctx.ellipse(0, tireHeight / 2 + 5, tireWidth / 1.5, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Dinding Samping 3D (Tire Sidewall/Depth)
+            const sideWidth = 24 * (isLeftWheel ? (1 - steerNorm * 0.5) : (1 + steerNorm * 0.5));
+            const sideOffsetX = isLeftWheel ? -tireWidth / 2 - sideWidth / 2 : tireWidth / 2 + sideWidth / 2;
+
+            ctx.fillStyle = '#0a0a0f';
+            ctx.beginPath();
+            ctx.roundRect(sideOffsetX - sideWidth / 2, -tireHeight / 2 + 4, sideWidth, tireHeight - 8, 12);
+            ctx.fill();
+            ctx.strokeStyle = '#222230';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 3. Telapak Ban Utama (Tire Tread Face 3D)
+            const treadGrad = ctx.createLinearGradient(-tireWidth / 2, 0, tireWidth / 2, 0);
+            treadGrad.addColorStop(0, '#111118');
+            treadGrad.addColorStop(0.3, '#242430');
+            treadGrad.addColorStop(0.7, '#242430');
+            treadGrad.addColorStop(1, '#0e0e14');
+
+            ctx.fillStyle = treadGrad;
+            ctx.beginPath();
+            ctx.roundRect(-tireWidth / 2, -tireHeight / 2, tireWidth, tireHeight, 10);
+            ctx.fill();
+            ctx.strokeStyle = '#3a3a4c';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // 4. Animasi Alur Kembangan 3D Berputar (3D Tread Patterns)
+            ctx.save();
+            ctx.clip(); // Masking sesuai bentuk ban
+            
+            ctx.strokeStyle = '#48485e';
+            ctx.lineWidth = 3;
+            const treadSpacing = 26;
+            const treadOffset = (wheelRotationAngle * 30) % treadSpacing;
+
+            for (let y = -tireHeight / 2 - treadSpacing + treadOffset; y <= tireHeight / 2 + treadSpacing; y += treadSpacing) {
+                // Pola Alur Kembangan V-Shape 3D
+                ctx.beginPath();
+                ctx.moveTo(-tireWidth / 2 + 4, y - 6);
+                ctx.lineTo(0, y + 6);
+                ctx.lineTo(tireWidth / 2 - 4, y - 6);
+                ctx.stroke();
+
+                // Garis Alur Tengah Longitudinal
+                ctx.strokeStyle = '#151520';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(-10, -tireHeight / 2);
+                ctx.lineTo(-10, tireHeight / 2);
+                ctx.moveTo(10, -tireHeight / 2);
+                ctx.lineTo(10, tireHeight / 2);
+                ctx.stroke();
+                ctx.strokeStyle = '#48485e';
+                ctx.lineWidth = 3;
+            }
+            ctx.restore();
+
+            // 5. Velg & Poros Hub 3D (Jika Terlihat Dari Sudut Perspektif POV Belakang)
+            const showRim = isLeftWheel ? (steerNorm > 0.1) : (steerNorm < -0.1);
+            if (showRim) {
+                ctx.save();
+                const rimX = isLeftWheel ? tireWidth / 2 - 5 : -tireWidth / 2 + 5;
+                ctx.translate(rimX, 0);
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, Math.abs(steerNorm) * 18, tireHeight / 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#bdc3c7';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, 1050, 650);
+            dashWireOffset += 0.8;
+
+            const sys = processLogic();
+            const powered = sys.powered;
+
+            if (sys.vss > 0) {
+                const speedMult = (sys.vss / 140) * 12;
+                wheelRotationAngle += speedMult * 0.05;
+                roadDashOffset += speedMult * 1.5;
+            }
+
+            // 1. VISUALISASI JALAN RAYA PERSPEKTIF 3D POV BELAKANG
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, 150);
+            skyGrad.addColorStop(0, '#020208');
+            skyGrad.addColorStop(1, '#101525');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, 1050, 150);
+
+            const speedFactor = Math.min(1.0, sys.vss / 10.0);
+            const turnOffset = (sys.vss > 0) ? ((steeringAngle / MAX_STEER_ANGLE) * 220 * speedFactor) : 0;
+            const topCenterX = 525 + turnOffset; 
+            const topRoadLeft = topCenterX - 105;
+            const topRoadRight = topCenterX + 105;
+
+            ctx.fillStyle = '#1c1d24';
+            ctx.beginPath();
+            ctx.moveTo(topRoadLeft, 150);
+            ctx.lineTo(topRoadRight, 150);
+            ctx.lineTo(1050, 270);
+            ctx.lineTo(0, 270);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.save();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([20, 15]);
+            ctx.lineDashOffset = -roadDashOffset;
+            ctx.beginPath();
+            ctx.moveTo(topCenterX, 150);
+            ctx.quadraticCurveTo(525 + turnOffset * 0.5, 210, 525, 270);
+            ctx.stroke();
+            ctx.restore();
+
+            // 2. RODA DEPAN TERBELOK PERSPEKTIF 3D POV BELAKANG
+            const rackShift = (steeringAngle / MAX_STEER_ANGLE) * 45;
+
+            // Gambar Ban Kiri 3D
+            draw3DRearWheel(220 + rackShift, 235, true, steeringAngle, sys.vss);
+
+            // Gambar Ban Kanan 3D
+            draw3DRearWheel(830 + rackShift, 235, false, steeringAngle, sys.vss);
+
+            // 3. POROS GARDAN & SASIS BELAKANG KENDARAAN (REAR SUSPENSION & AXLE)
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.moveTo(220 + rackShift, 235);
+            ctx.lineTo(830 + rackShift, 235);
+            ctx.stroke();
+
+            // Diff/Gardan Tengah
+            ctx.fillStyle = '#1a252f';
+            ctx.beginPath();
+            ctx.arc(525 + rackShift, 235, 24, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#00d2ffaa'; ctx.lineWidth = 2; ctx.stroke();
+
+            // 4. KAP MESIN & MEKANISME RACK EPS
+            ctx.fillStyle = 'rgba(20, 25, 40, 0.75)';
+            ctx.beginPath();
+            ctx.moveTo(150, 270);
+            ctx.lineTo(900, 270);
+            ctx.lineTo(1050, 420);
+            ctx.lineTo(0, 420);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#00d2ff33'; ctx.lineWidth = 2; ctx.stroke();
+
+            ctx.strokeStyle = '#bdc3c7'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(220 + rackShift, 250); ctx.lineTo(240 + rackShift, 280); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(830 + rackShift, 250); ctx.lineTo(810 + rackShift, 280); ctx.stroke();
+
+            ctx.fillStyle = '#1c2833'; ctx.fillRect(220, 270, 610, 20); ctx.strokeStyle = '#555'; ctx.strokeRect(220, 270, 610, 20);
+            ctx.fillStyle = '#ecf0f1'; ctx.fillRect(180 + rackShift, 275, 690, 10);
+
+            // Electric Motor Assist DC
+            ctx.fillStyle = sys.pwm > 0 ? '#8e44ad' : '#2c3e50'; ctx.beginPath(); ctx.roundRect(390, 315, 75, 60, 6); ctx.fill();
+            ctx.strokeStyle = sys.pwm > 0 ? '#a569bd' : '#7f8c8d'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText("ELECTRIC", 403, 342); ctx.fillText("MOTOR ASSIST", 395, 355);
+
+            // Torque Sensor Housing
+            ctx.fillStyle = '#d35400'; ctx.beginPath(); ctx.roundRect(505, 355, 40, 35, 5); ctx.fill();
+            ctx.strokeStyle = '#e67e22'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 8px sans-serif'; ctx.fillText("TORQUE", 508, 372); ctx.fillText("SENSOR", 508, 382);
+
+            // Steering Angle Sensor (SAS)
+            ctx.fillStyle = '#f39c12'; ctx.beginPath(); ctx.roundRect(470, 440, 110, 25, 4); ctx.fill();
+            ctx.strokeStyle = '#d35400'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif'; ctx.fillText("STEERING ANGLE SENSOR (SAS)", 475, 456);
+
+            // Poros Kemudi Utama
+            ctx.strokeStyle = '#7f8c8d'; ctx.lineWidth = 14;
+            ctx.beginPath(); ctx.moveTo(525, 390); ctx.lineTo(525, 520); ctx.stroke();
+
+            // Vehicle Speed Sensor (VSS)
+            drawVSS(820, 160);
+
+            // EPS ECU Module
+            ctx.fillStyle = '#1c1c28'; ctx.beginPath(); ctx.roundRect(650, 315, 110, 90, 8); ctx.fill();
+            ctx.strokeStyle = powered ? '#00d2ff' : '#555'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.fillStyle = powered ? '#00ff66' : '#e74c3c'; ctx.beginPath(); ctx.arc(745, 330, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.fillText("EPS ECU", 680, 358);
+            ctx.font = '8px sans-serif'; ctx.fillStyle = '#aaa'; ctx.fillText("Control Module", 676, 372);
+
+            // Aki / Baterai
+            drawBattery(880, 320);
+
+            // 5. INTERKONEKSI KABEL DAN SINYAL KELISTRIKAN
+            drawWire([[890, 320], [890, 290], [705, 290], [705, 315]], powered ? '#ff3333' : '#444', powered, 3);
+            drawWire([[545, 372], [650, 372]], powered ? '#00e5ff' : '#444', powered, 2);
+            drawWire([[580, 452], [680, 452], [680, 405]], powered ? '#00e5ff' : '#444', powered, 2);
+            drawWire([[845, 190], [845, 345], [760, 345]], powered ? '#00e5ff' : '#444', powered, 2);
+            drawWire([[650, 330], [465, 330]], sys.pwm > 0 ? '#ffcc00' : '#444', sys.pwm > 0, 3.5);
+            drawWire([[940, 320], [940, 280], [1000, 280]], '#666', false, 2);
+
+            // 6. KABIN DASHBOARD & RODA KEMUDI POV BELAKANG
+            const dashGrad = ctx.createLinearGradient(0, 420, 0, 650);
+            dashGrad.addColorStop(0, '#0f0f15');
+            dashGrad.addColorStop(1, '#050508');
+            ctx.fillStyle = dashGrad;
+            ctx.fillRect(0, 420, 1050, 230);
+            ctx.strokeStyle = '#222230'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0, 420); ctx.lineTo(1050, 420); ctx.stroke();
+
+            ctx.fillStyle = '#181824'; ctx.beginPath(); ctx.ellipse(525, 420, 160, 45, 0, Math.PI, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#00d2ffaa'; ctx.lineWidth = 1.5; ctx.stroke();
+            
+            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 12px monospace';
+            ctx.fillText(`${sys.vss} KM/H`, 495, 412);
+
+            ctx.fillStyle = isIgnitionOn ? (isFuseOk ? '#28a745' : '#ff3333') : '#444';
+            ctx.beginPath(); ctx.arc(555, 408, 6, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 7px sans-serif'; ctx.fillText("EPS", 548, 410);
+
+            ctx.fillStyle = isHandbrakeOn ? '#ff3333' : '#333';
+            ctx.beginPath(); ctx.arc(475, 408, 7, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 7px sans-serif'; 
+            ctx.fillText("(P)", 470, 411);
+
+            // ROTASI SETIR POV
+            const isLocked = Math.abs(steeringAngle) >= MAX_STEER_ANGLE;
+            const radSteer = (steeringAngle * Math.PI) / 180;
+            
+            ctx.save();
+            ctx.translate(centerWheelPos.x, centerWheelPos.y);
+            ctx.rotate(radSteer);
+
+            ctx.strokeStyle = isLocked ? '#dc3545' : '#1e2530'; ctx.lineWidth = 26;
+            ctx.beginPath(); ctx.arc(0, 0, centerWheelPos.radius, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = isLocked ? '#ff4d4d' : '#34495e'; ctx.lineWidth = 18;
+            ctx.beginPath(); ctx.arc(0, 0, centerWheelPos.radius, 0, Math.PI * 2); ctx.stroke();
+
+            ctx.strokeStyle = isLocked ? '#ffffff' : '#f1c40f'; ctx.lineWidth = 18;
+            ctx.beginPath(); ctx.arc(0, 0, centerWheelPos.radius, -Math.PI/2 - 0.08, -Math.PI/2 + 0.08); ctx.stroke();
+
+            ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(0, 0, 42, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = isLocked ? '#dc3545' : '#1a252f'; ctx.lineWidth = 4; ctx.stroke();
+            
+            ctx.fillStyle = isLocked ? '#ff4d4d' : '#00d2ff'; 
+            ctx.font = 'bold 10px sans-serif'; 
+            ctx.fillText(isLocked ? "LOCK" : "EPS", -12, 4);
+
+            ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 16; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(-35, 0); ctx.lineTo(-centerWheelPos.radius + 10, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(35, 0); ctx.lineTo(centerWheelPos.radius - 10, 0); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 35); ctx.lineTo(0, centerWheelPos.radius - 10); ctx.stroke();
+
+            ctx.restore();
+
+            requestAnimationFrame(render);
+        }
+
+        function showModal(comp) {
+            document.getElementById('modalTitle').innerText = comp.title;
+            document.getElementById('modalCategory').innerText = comp.cat;
+            document.getElementById('modalFunction').innerText = comp.func;
+            document.getElementById('modalWorking').innerText = comp.work;
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if (!e || e.target.id === 'detailModal' || e.target.className === 'close-btn') {
+                document.getElementById('detailModal').style.display = 'none';
+            }
+        }
+
+        render();
+    </script>
+
+<script src="./script.js"></script></body></html>
