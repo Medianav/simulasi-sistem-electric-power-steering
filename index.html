@@ -3,6 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="./style.css"><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
   "imports": {}
 }</script></head><body>
+<script>window.livecodes = window.livecodes || {};</script><title>Sistem Electric Power Steering</title><meta name="title" content="Sistem Electric Power Steering"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="./style.css"><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script>
 
 
     <meta charset="UTF-8">
@@ -207,8 +209,8 @@
 
     <div class="wrapper">
         <div class="header-area">
-            <h1>Simulator Interaktif System EPS 3D (Simulasi Beban Static Racksteer)</h1>
-            <p class="subtitle">Beban Gesek Ban Maksimal Saat Berhenti (0 km/h) &amp; Berkurang Saat Bergerak</p>
+            <h1>Sistem Electric Power Steering</h1>
+            <p class="subtitle">Mapel B5 X-Otomotif SMKS Teknologi Madania Salubarani</p>
         </div>
 
         <div class="main-layout">
@@ -246,7 +248,7 @@
                         <strong id="effortVal" style="color: #ff3344;">HEAVY (NO ASSIST)</strong>
                     </div>
                     <div class="data-row">
-                        <span>Estimasi Torsi Beban Rack:</span>
+                        <span>Estimasi Torsi Beban Rack Steer:</span>
                         <strong id="rackLoadVal" style="color: #ff9900;">12.5 Nm (HIGH)</strong>
                     </div>
                     <div class="data-row">
@@ -262,7 +264,7 @@
                         <strong id="pinionRpmVal" style="color: #f39c12;">0.0°</strong>
                     </div>
                     <div class="data-row">
-                        <span>Pergeseran Batang Rack:</span>
+                        <span>Pergeseran Batang Rack Steer:</span>
                         <strong id="rackVal" style="color: #ffcc00;">0.0 mm</strong>
                     </div>
                     <div class="data-row">
@@ -344,8 +346,8 @@
             { id: "epsecu", title: "9. Modul Kontrol EPS ECU", cat: "Unit Otak Pusat", func: "Mengkalkulasi kebutuhan arus bantuan assist berdasarkan Kecepatan & Torsi.", work: "Menerima sinyal dari sensor-sensor dan mengalirkan daya PWM ke motor assist.", getBounds: () => ({x: 660, y: 315, w: 100, h: 70}) },
             { id: "steeringwheel", title: "10. Roda Kemudi (Steering Wheel POV)", cat: "Input Pengemudi", func: "Menerima input gaya putar langsung dari pengemudi.", work: "Menyalurkan rotasi setir ke steering shaft hingga mentok ±450°.", getBounds: () => ({x: 425, y: 420, w: 200, h: 200}) },
             { id: "rackpinion", title: "11. Steering Rack Bar & Housing", cat: "Transmisi Gerak Horizontal", func: "Mengubah rotasi poros pinion menjadi gerakan lurus horizontal (translasi).", work: "Batang baja bergerigi meluncur ke kiri/kanan saat didorong Pinion Gear.", getBounds: () => ({x: 260, y: 275, w: 530, h: 30}) },
-            { id: "leftwheel", title: "12. Ban Depan Kiri 3D (POV Belakang)", cat: "Aktuator Roda Kontak", func: "Mengubah arah laju kendaraan di jalan raya.", work: "Berputar secara 3D dan miring saat diputar oleh tie rod & steering knuckle.", getBounds: () => ({x: 160, y: 140, w: 100, h: 160}) },
-            { id: "rightwheel", title: "13. Ban Depan Kanan 3D (POV Belakang)", cat: "Aktuator Roda Kontak", func: "Mengubah arah laju kendaraan di jalan raya.", work: "Berputar secara 3D dan miring saat diputar oleh tie rod & steering knuckle.", getBounds: () => ({x: 790, y: 140, w: 100, h: 160}) }
+            { id: "leftwheel", title: "12. Ban Depan Kiri", cat: "Aktuator Roda Kontak", func: "Mengubah arah laju kendaraan di jalan raya.", work: "Berputar saat diputar oleh tie rod & menerima gerakan kemudi dari steering knuckle.", getBounds: () => ({x: 160, y: 140, w: 100, h: 160}) },
+            { id: "rightwheel", title: "13. Ban Depan Kanan", cat: "Aktuator Roda Kontak", func: "Mengubah arah laju kendaraan di jalan raya.", work: "Berputar saat diputar oleh tie rod & menerima gerakan kemudi dari steering knuckle.", getBounds: () => ({x: 790, y: 140, w: 100, h: 160}) }
         ];
 
         function setIgnition(state) {
@@ -953,4 +955,4 @@
         render();
     </script>
 
-<script src="./script.js"></script></body></html>
+<script src="./script.js"></script><script src="./script.js"></script></body></html>
